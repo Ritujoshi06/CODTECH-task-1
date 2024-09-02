@@ -1,0 +1,60 @@
+import nmap
+import scapy.all as scapy
+import shodan
+
+# Nmap scan
+def nmap_scan(target):
+    nm = nmap.PortScanner()
+    nm.scan(hosts=target, arguments="-sS -sV -O")
+    return nm.all_hosts()
+
+# Scapy ping scan
+def scapy_ping(target):
+    arp = scapy.ARP(pdst=target)
+    ether = scapy.Ether(dst="ff:ff:ff:ff:ff:ff")
+    packet = ether / arp
+    result = scapy.srp(packet, timeout=3, verbose=False)[0]
+    return [res[1].src for res in result]
+
+# Shodan search
+def shodan_search(query):
+    api_key = "YOUR_SHODAN_API_KEY"
+    shodan_client = shodan.Client(api_key)
+    results = shodan_client.search(query)
+    return results
+
+# Vulnerability checking (example: outdated software)
+def check_vulnerabilities(host, port):
+    # Use a vulnerability database or API to check for known vulnerabilities
+    # Example using a vulnerability database:
+    # vuln_db = get_vulnerability_database()
+    # vuln_info = vuln_db.check_vulnerability(host, port)
+    # print(vuln_info)
+
+# Main function
+def main():
+    target = input("Enter target IP or hostname: ")
+    
+    # Nmap scan
+    nmap_results = nmap_scan(target)
+    print("Nmap results:")
+    print(nmap_results)
+    
+    # Scapy ping scan
+    scapy_results = scapy_ping(target)
+    print("Scapy ping results:")
+    print(scapy_results)
+    
+    # Shodan search
+    shodan_query = f"hostname:{target}"
+    shodan_results = shodan_search(shodan_query)
+    print("Shodan results:")
+    print(shodan_results)
+    
+    # Vulnerability checking (example)
+    for host, ports in nmap_results.items():
+        for port in ports:
+            check_vulnerabilities(host, port)
+
+if _name_ == "_main_":
+    main()
